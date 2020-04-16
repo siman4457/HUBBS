@@ -21,8 +21,12 @@ data = pd.read_csv("Non_uniform_health_sleep_mgt_feature_final.csv")
 
 cols = [0, 69]  # non-feature columns
 X = data.drop(data.columns[cols], axis=1)
-min_max_scaler = preprocessing.MinMaxScaler()
 y = data[["sleep_mgt", "ID"]]
+# get labels in a list
+want = y.drop(["ID"], axis=1)
+labels = []
+for i in range(0, len(want)):
+    labels.append(want["sleep_mgt"].at[i])
 ID = data["ID"]
 predictions = []
 unique = []
@@ -73,18 +77,13 @@ for i in range(0, len(unique)):
     # use 25% of the IDs rather than a 25% of random data
     # split the training data into a validation set
     es = EarlyStopping(monitor="val_loss", patience=10, verbose=1)
-    model.fit(X_train, y_train, batch_size=10, epochs=100, shuffle=True, verbose=1,
+    model.fit(X_train, y_train, batch_size=10, epochs=3, shuffle=True, verbose=1,
               validation_data=(X_val, y_val), callbacks=[es])
 
     prediction = model.predict(X_test)
     for x in range(0, len(prediction)):
         predictions.append(prediction[x][0])
 
-# get labels in a list
-want = y.drop(["ID"], axis=1)
-labels = []
-for i in range(0, len(want)):
-    labels.append(want["sleep_mgt"].at[i])
-
 print(predictions)
+print(labels)
 print(stats.pearsonr(predictions, labels))
